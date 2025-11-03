@@ -1,0 +1,30 @@
+{
+  "version": 2,
+  "builds": [
+    {
+      "src": "api/**",
+      "use": "@vercel/node"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/site/(?<slug>[^/]+)/(.*)",
+      "dest": "/websites/sites/$slug/$2",
+      "headers": {
+        "Cache-Control": "public, max-age=31536000, immutable"
+      }
+    },
+    {
+      "src": "/site/(?<slug>[^/]+)",
+      "dest": "/websites/sites/$slug/index.html"
+    },
+    {
+      "src": "/sites",
+      "dest": "/sites.html"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "/api/index.js"
+    }
+  ]
+}

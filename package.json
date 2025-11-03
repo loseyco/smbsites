@@ -1,0 +1,36 @@
+{
+  "name": "small-business-website-generator",
+  "version": "1.0.0",
+  "description": "Tool for rapidly generating modern, mobile-first websites for local businesses",
+  "main": "generator/index.js",
+  "type": "module",
+  "scripts": {
+    "scrape": "node scraper/analyzer.js",
+    "generate": "node generator/index.js",
+    "pipeline": "node automation/pipeline.js",
+    "outreach": "node automation/outreach.js",
+    "customers": "node scripts/customer-status.js",
+    "update-status": "node scripts/update-customer-status.js",
+    "migrate": "node scripts/migrate-to-customers.js",
+    "build-index": "node scripts/build-index.js",
+    "build-sites": "node scripts/build-index.js",
+    "dev": "node generator/index.js",
+    "serve": "node server.js"
+  },
+  "keywords": [
+    "website",
+    "generator",
+    "scraper",
+    "small-business"
+  ],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "cheerio": "^1.0.0",
+    "puppeteer": "^21.6.0",
+    "chalk": "^5.3.0",
+    "fs-extra": "^11.2.0",
+    "dotenv": "^16.4.5"
+  }
+}
+

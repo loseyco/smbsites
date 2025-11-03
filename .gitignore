@@ -1,0 +1,12 @@
+node_modules/
+.env
+.DS_Store
+*.log
+output/
+.scraped-data/
+dist/
+sites/
+websites/
+*.csv
+index.html
+sites.html
