@@ -17,30 +17,6 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // Contact Form Handling
-    const contactForm = document.getElementById('contactForm');
-    if (contactForm) {
-        contactForm.addEventListener('submit', function(e) {
-            e.preventDefault();
-            
-            // Get form data
-            const formData = new FormData(contactForm);
-            const data = {
-                name: formData.get('name'),
-                email: formData.get('email'),
-                message: formData.get('message')
-            };
-
-            // Simple form submission handling
-            // In production, you'd send this to a backend or use a service like Formspree
-            console.log('Form submitted:', data);
-            
-            // Show success message
-            alert('Thank you for your message! We\'ll get back to you soon.');
-            contactForm.reset();
-        });
-    }
-
     // Smooth scrolling for anchor links
     document.querySelectorAll('a[href^="#"]').forEach(anchor => {
         anchor.addEventListener('click', function(e) {
@@ -59,3 +35,61 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 });
 
+// Copy email to clipboard function (global for onclick handler)
+function copyEmailToClipboard(email) {
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(email).then(() => {
+            // Show feedback
+            const btn = document.querySelector('.contact-copy-btn');
+            if (btn) {
+                const originalText = btn.innerHTML;
+                btn.innerHTML = '✅ Copied!';
+                btn.classList.add('copied');
+                setTimeout(() => {
+                    btn.innerHTML = originalText;
+                    btn.classList.remove('copied');
+                }, 2000);
+            }
+        }).catch(err => {
+            console.error('Failed to copy email:', err);
+            fallbackCopyEmail(email);
+        });
+    } else {
+        fallbackCopyEmail(email);
+    }
+}
+
+// Fallback copy method for older browsers
+function fallbackCopyEmail(email) {
+    const textarea = document.createElement('textarea');
+    textarea.value = email;
+    textarea.style.position = 'fixed';
+    textarea.style.opacity = '0';
+    textarea.style.left = '-9999px';
+    document.body.appendChild(textarea);
+    textarea.focus();
+    textarea.select();
+    
+    try {
+        const successful = document.execCommand('copy');
+        if (successful) {
+            const btn = document.querySelector('.contact-copy-btn');
+            if (btn) {
+                const originalText = btn.innerHTML;
+                btn.innerHTML = '✅ Copied!';
+                btn.classList.add('copied');
+                setTimeout(() => {
+                    btn.innerHTML = originalText;
+                    btn.classList.remove('copied');
+                }, 2000);
+            }
+        } else {
+            alert('Please copy manually: ' + email);
+        }
+    } catch (err) {
+        console.error('Fallback copy failed:', err);
+        alert('Please copy manually: ' + email);
+    }
+    
+    document.body.removeChild(textarea);
+}
