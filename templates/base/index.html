@@ -210,20 +210,6 @@
                     </div>
                     {{/if}}
                 </div>
-                <div class="contact-form">
-                    <h3>Get In Touch</h3>
-                    {{#if email}}
-                    <p class="contact-form-description">Send us an email and we'll get back to you as soon as possible.</p>
-                    <a href="mailto:{{email}}?subject=Contact%20from%20{{businessName}}&body=Hello,%0D%0A%0D%0AI%20would%20like%20to%20get%20in%20touch%20about%20your%20services.%0D%0A%0D%0AThank%20you!" class="btn btn-primary btn-large contact-email-btn">
-                        📧 Email Us: {{email}}
-                    </a>
-                    <button type="button" class="btn btn-secondary contact-copy-btn" data-email="{{email}}" onclick="copyEmailToClipboard('{{email}}')">
-                        📋 Copy Email Address
-                    </button>
-                    {{else}}
-                    <p class="contact-form-description">Please call us or visit us in person using the contact information shown on the left. We'd love to hear from you!</p>
-                    {{/if}}
-                </div>
             </div>
             {{#if socialLinks}}
             <div class="social-links-section">
