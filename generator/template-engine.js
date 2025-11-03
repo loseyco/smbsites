@@ -135,21 +135,92 @@ export function renderTemplate(template, data) {
     // Process top-level {{#if}} conditionals
     let ifCount = 0;
     while (result.includes('{{#if') && ifCount < 10) {
-        // Process if/else blocks first
-        const ifElsePattern = /\{\{#if\s+(\w+)\}\}([\s\S]*?)\{\{else\}\}([\s\S]*?)\{\{\/if\}\}/g;
+        // Process if/else blocks first - need to match correctly by counting nested blocks
+        // Find all if/else blocks by finding {{#if ... {{else}} ... {{/if}} patterns
+        // and ensuring we match the correct closing {{/if}}
         const ifElseMatches = [];
-        let ifElseMatch;
+        let searchIndex = 0;
         
-        // Reset regex lastIndex and collect all matches
-        ifElsePattern.lastIndex = 0;
-        while ((ifElseMatch = ifElsePattern.exec(result)) !== null) {
-            ifElseMatches.push({
-                fullMatch: ifElseMatch[0],
-                variable: ifElseMatch[1],
-                ifContent: ifElseMatch[2],
-                elseContent: ifElseMatch[3],
-                index: ifElseMatch.index
-            });
+        while (searchIndex < result.length) {
+            const ifStart = result.indexOf('{{#if', searchIndex);
+            if (ifStart === -1) break;
+            
+            // Find the variable name
+            const ifMatch = result.substring(ifStart).match(/^\{\{#if\s+(\w+)\}\}/);
+            if (!ifMatch) {
+                searchIndex = ifStart + 5;
+                continue;
+            }
+            
+            const variable = ifMatch[1];
+            const ifContentStart = ifStart + ifMatch[0].length;
+            
+            // Look for {{else}} before any closing {{/if}}
+            let depth = 1;
+            let pos = ifContentStart;
+            let elsePos = -1;
+            let elseEndPos = -1;
+            let ifEndPos = -1;
+            
+            while (pos < result.length && depth > 0) {
+                const nextIf = result.indexOf('{{#if', pos);
+                const nextElse = result.indexOf('{{else}}', pos);
+                const nextEndIf = result.indexOf('{{/if}}', pos);
+                
+                // Find the next relevant token
+                let nextToken = result.length;
+                let tokenType = 'end';
+                
+                if (nextIf !== -1 && nextIf < nextToken) {
+                    nextToken = nextIf;
+                    tokenType = 'if';
+                }
+                if (nextElse !== -1 && nextElse < nextToken && depth === 1) {
+                    nextToken = nextElse;
+                    tokenType = 'else';
+                }
+                if (nextEndIf !== -1 && nextEndIf < nextToken) {
+                    nextToken = nextEndIf;
+                    tokenType = 'endif';
+                }
+                
+                if (tokenType === 'if') {
+                    depth++;
+                    pos = nextToken + 5;
+                } else if (tokenType === 'else' && depth === 1) {
+                    elsePos = nextToken;
+                    elseEndPos = nextToken + 8;
+                    pos = nextToken + 8;
+                } else if (tokenType === 'endif') {
+                    depth--;
+                    if (depth === 0) {
+                        ifEndPos = nextToken;
+                    }
+                    pos = nextToken + 7;
+                } else {
+                    break;
+                }
+            }
+            
+            // If we found a matching else and endif, this is an if/else block
+            if (elsePos !== -1 && ifEndPos !== -1) {
+                const ifContent = result.substring(ifContentStart, elsePos);
+                const elseContent = result.substring(elseEndPos, ifEndPos);
+                const fullMatch = result.substring(ifStart, ifEndPos + 7);
+                
+                ifElseMatches.push({
+                    fullMatch: fullMatch,
+                    variable: variable,
+                    ifContent: ifContent,
+                    elseContent: elseContent,
+                    index: ifStart
+                });
+                
+                searchIndex = ifEndPos + 7;
+            } else {
+                // Not an if/else block, skip it
+                searchIndex = ifStart + 5;
+            }
         }
         
         // Process matches in reverse order (to preserve indices)
