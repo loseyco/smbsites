@@ -62,8 +62,8 @@ async function generateWebsite(dataFile, outputDir = null) {
             accentColor: normalizeColor(data.colors?.accentColor),
             textColor: normalizeColor(data.colors?.textColor),
             bgColor: normalizeColor(data.colors?.bgColor),
-            phone: data.contact?.phone || '',
-            email: data.contact?.email || '',
+            phone: data.contact?.phone || null,
+            email: data.contact?.email || null,
             address: data.contact?.address || '',
             hours: data.hours || '',
             services: (data.services || []).map((service, index) => ({
