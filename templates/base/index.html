@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="{{businessDescription}}">
+    <title>{{businessName}} - {{businessTagline}}</title>
+    <link rel="stylesheet" href="{{siteBasePath}}/styles.css">
+</head>
+<body>
+    <!-- Top Bar -->
+    {{#if phone}}
+    <div class="top-bar">
+        <div class="container">
+            <div class="top-bar-content">
+                <a href="tel:{{phone}}" class="top-bar-link">
+                    <span class="top-bar-icon">☎</span> Call Us: {{phone}}
+                </a>
+                {{#if socialLinks}}
+                <div class="top-bar-social">
+                    {{#each socialLinks}}
+                    <a href="{{this.url}}" target="_blank" rel="noopener noreferrer" aria-label="{{this.platform}}" class="social-icon-small">
+                        {{this.platform}}
+                    </a>
+                    {{/each}}
+                </div>
+                {{/if}}
+            </div>
+        </div>
+    </div>
+    {{/if}}
+
+
+    <!-- Header -->
+    <header class="header">
+        <div class="container">
+            <div class="header-content">
+                <div class="logo">
+                    {{#if logo}}
+                    <img src="{{siteBasePath}}/assets/logo{{logoExt}}" alt="{{businessName}}" class="logo-img" onerror="this.style.display='none'; this.nextElementSibling.classList.remove('logo-text-hidden');">
+                    <span class="logo-text logo-text-hidden">{{businessName}}</span>
+                    {{else}}
+                    <span class="logo-text">{{businessName}}</span>
+                    {{/if}}
+                </div>
+                <nav class="nav">
+                    <button class="nav-toggle" aria-label="Toggle menu">
+                        <span></span>
+                        <span></span>
+                        <span></span>
+                    </button>
+                    <ul class="nav-menu">
+                        <li><a href="#home">Home</a></li>
+                        {{#if hasServices}}<li><a href="#services">Menu</a></li>{{/if}}
+                        <li><a href="#about">About</a></li>
+                        {{#if hours}}<li><a href="#hours">Hours</a></li>{{/if}}
+                        <li><a href="#contact">Contact</a></li>
+                    </ul>
+                </nav>
+            </div>
+        </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section id="home" class="hero">
+        {{#if heroImage}}
+        <div class="hero-background">
+            <img src="{{heroImage.url}}" alt="{{heroImage.alt}}" class="hero-bg-image">
+            <div class="hero-overlay"></div>
+        </div>
+        {{/if}}
+        <div class="container">
+            <div class="hero-content">
+                <h1 class="hero-title">{{businessName}}</h1>
+                <p class="hero-tagline">{{businessTagline}}</p>
+                <div class="hero-buttons">
+                    <a href="#contact" class="btn btn-primary btn-large">Get in Touch</a>
+                    {{#if hasServices}}
+                    <a href="#services" class="btn btn-secondary btn-large">View Menu</a>
+                    {{/if}}
+                </div>
+            </div>
+        </div>
+    </section>
+
+    {{#if hasServices}}
+    <!-- Services Section -->
+    <section id="services" class="services">
+        <div class="container">
+            <div class="section-header">
+                <h2 class="section-title">Our Menu & Services</h2>
+                <p class="section-subtitle">Quality ingredients, exceptional service</p>
+            </div>
+            <div class="services-grid">
+                {{#each services}}
+                <div class="service-card">
+                    <div class="service-image">
+                        {{#if this.image}}
+                        <img src="{{this.image.url}}" alt="{{this.name}}" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                        {{/if}}
+                        <div class="service-image-placeholder{{#if this.image}} service-image-hidden{{/if}}">
+                            <span>{{this.name}}</span>
+                        </div>
+                    </div>
+                    <div class="service-content">
+                        <h3>{{this.name}}</h3>
+                        <p>{{this.description}}</p>
+                    </div>
+                </div>
+                {{/each}}
+            </div>
+        </div>
+    </section>
+    {{/if}}
+
+    {{#if hasImages}}
+    <!-- Gallery Section -->
+    <section class="gallery">
+        <div class="container">
+            <div class="section-header">
+                <h2 class="section-title">See What We Offer</h2>
+            </div>
+            <div class="gallery-grid">
+                {{#each images}}
+                <div class="gallery-item">
+                    <img src="{{this.url}}" alt="{{this.alt}}" loading="lazy">
+                </div>
+                {{/each}}
+            </div>
+        </div>
+    </section>
+    {{/if}}
+
+    <!-- About Section -->
+    <section id="about" class="about">
+        <div class="container">
+            <div class="about-grid">
+                <div class="about-content">
+                    <h2 class="section-title">About {{businessName}}</h2>
+                    <p class="about-text">{{aboutText}}</p>
+                    {{#if address}}
+                    <div class="about-info">
+                        <p class="info-item"><strong>📍 Location:</strong> {{address}}</p>
+                        {{#if phone}}
+                        <p class="info-item"><strong>📞 Phone:</strong> <a href="tel:{{phone}}">{{phone}}</a></p>
+                        {{/if}}
+                    </div>
+                    {{/if}}
+                </div>
+                {{#if hasImages}}
+                <div class="about-image">
+                    {{#if images.0}}
+                    <img src="{{images.0.url}}" alt="{{businessName}}">
+                    {{/if}}
+                </div>
+                {{/if}}
+            </div>
+        </div>
+    </section>
+
+    {{#if hours}}
+    <!-- Hours Section -->
+    <section id="hours" class="hours">
+        <div class="container">
+            <div class="hours-card">
+                <h2 class="section-title">Hours</h2>
+                <div class="hours-content">
+                    <pre class="hours-text">{{hours}}</pre>
+                </div>
+            </div>
+        </div>
+    </section>
+    {{/if}}
+
+    <!-- Contact Section -->
+    <section id="contact" class="contact">
+        <div class="container">
+            <div class="section-header">
+                <h2 class="section-title">Get In Touch</h2>
+                <p class="section-subtitle">We'd love to hear from you</p>
+            </div>
+            <div class="contact-grid">
+                <div class="contact-info">
+                    {{#if address}}
+                    <div class="contact-card">
+                        <div class="contact-icon">📍</div>
+                        <h3>Address</h3>
+                        <p>{{address}}</p>
+                    </div>
+                    {{/if}}
+                    {{#if phone}}
+                    <div class="contact-card">
+                        <div class="contact-icon">📞</div>
+                        <h3>Phone</h3>
+                        <p><a href="tel:{{phone}}" class="contact-link">{{phone}}</a></p>
+                    </div>
+                    {{/if}}
+                    {{#if email}}
+                    <div class="contact-card">
+                        <div class="contact-icon">✉️</div>
+                        <h3>Email</h3>
+                        <p><a href="mailto:{{email}}" class="contact-link">{{email}}</a></p>
+                    </div>
+                    {{/if}}
+                    {{#if hours}}
+                    <div class="contact-card">
+                        <div class="contact-icon">🕐</div>
+                        <h3>Hours</h3>
+                        <p>{{hours}}</p>
+                    </div>
+                    {{/if}}
+                </div>
+                <form class="contact-form" id="contactForm">
+                    <h3>Send Us a Message</h3>
+                    <div class="form-group">
+                        <label for="name">Name</label>
+                        <input type="text" id="name" name="name" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="email">Email</label>
+                        <input type="email" id="email" name="email" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="message">Message</label>
+                        <textarea id="message" name="message" rows="5" required></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-large">Send Message</button>
+                </form>
+            </div>
+            {{#if socialLinks}}
+            <div class="social-links-section">
+                <p class="social-links-title">Follow Us</p>
+                <div class="social-links-grid">
+                    {{#each socialLinks}}
+                    <a href="{{this.url}}" target="_blank" rel="noopener noreferrer" class="social-link" aria-label="{{this.platform}}">
+                        {{this.platform}}
+                    </a>
+                    {{/each}}
+                </div>
+            </div>
+            {{/if}}
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <p>&copy; {{currentYear}} {{businessName}}. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script src="{{siteBasePath}}/script.js"></script>
+</body>
+</html>

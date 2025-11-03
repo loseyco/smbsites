@@ -8,5 +8,8 @@ dist/
 sites/
 websites/
 *.csv
-index.html
-sites.html
+# Generated files at root level only
+/index.html
+/sites.html
+# Keep template files
+!templates/
