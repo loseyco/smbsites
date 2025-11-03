@@ -71,38 +71,135 @@ export function renderTemplate(template, data) {
         loopCount++;
     }
 
+    // Helper function to process nested conditionals recursively
+    function processNestedConditionals(content, data) {
+        let processed = content;
+        let nestedCount = 0;
+        
+        while (processed.includes('{{#if') && nestedCount < 5) {
+            // Handle nested if/else blocks first
+            const nestedIfElse = /\{\{#if\s+(\w+)\}\}([\s\S]*?)\{\{else\}\}([\s\S]*?)\{\{\/if\}\}/g;
+            let nestedMatch;
+            const nestedMatches = [];
+            
+            // Reset regex lastIndex
+            nestedIfElse.lastIndex = 0;
+            while ((nestedMatch = nestedIfElse.exec(processed)) !== null) {
+                nestedMatches.push({
+                    fullMatch: nestedMatch[0],
+                    variable: nestedMatch[1],
+                    ifContent: nestedMatch[2],
+                    elseContent: nestedMatch[3],
+                    index: nestedMatch.index
+                });
+            }
+            
+            // Process in reverse order
+            for (let i = nestedMatches.length - 1; i >= 0; i--) {
+                const m = nestedMatches[i];
+                const value = getNestedValue(data, m.variable);
+                const replacement = isTruthy(value) ? m.ifContent : m.elseContent;
+                processed = processed.substring(0, m.index) + replacement + processed.substring(m.index + m.fullMatch.length);
+            }
+            
+            // Handle nested simple if blocks (without else)
+            const nestedIf = /\{\{#if\s+(\w+)\}\}([\s\S]*?)\{\{\/if\}\}/g;
+            const simpleMatches = [];
+            let simpleMatch;
+            
+            // Reset regex lastIndex
+            nestedIf.lastIndex = 0;
+            while ((simpleMatch = nestedIf.exec(processed)) !== null) {
+                simpleMatches.push({
+                    fullMatch: simpleMatch[0],
+                    variable: simpleMatch[1],
+                    content: simpleMatch[2],
+                    index: simpleMatch.index
+                });
+            }
+            
+            // Process in reverse order
+            for (let i = simpleMatches.length - 1; i >= 0; i--) {
+                const m = simpleMatches[i];
+                const value = getNestedValue(data, m.variable);
+                const replacement = isTruthy(value) ? m.content : '';
+                processed = processed.substring(0, m.index) + replacement + processed.substring(m.index + m.fullMatch.length);
+            }
+            
+            nestedCount++;
+        }
+        
+        return processed;
+    }
+
     // Process top-level {{#if}} conditionals
     let ifCount = 0;
     while (result.includes('{{#if') && ifCount < 10) {
         // Process if/else blocks first
-        const ifElseRegex = /\{\{#if\s+(\w+)\}\}([\s\S]*?)\{\{else\}\}([\s\S]*?)\{\{\/if\}\}/;
+        const ifElsePattern = /\{\{#if\s+(\w+)\}\}([\s\S]*?)\{\{else\}\}([\s\S]*?)\{\{\/if\}\}/g;
+        const ifElseMatches = [];
         let ifElseMatch;
         
-        while ((ifElseMatch = result.match(ifElseRegex)) !== null) {
-            const [fullMatch, variable, ifContent, elseContent] = ifElseMatch;
-            const value = getNestedValue(data, variable);
-            const index = result.indexOf(fullMatch);
+        // Reset regex lastIndex and collect all matches
+        ifElsePattern.lastIndex = 0;
+        while ((ifElseMatch = ifElsePattern.exec(result)) !== null) {
+            ifElseMatches.push({
+                fullMatch: ifElseMatch[0],
+                variable: ifElseMatch[1],
+                ifContent: ifElseMatch[2],
+                elseContent: ifElseMatch[3],
+                index: ifElseMatch.index
+            });
+        }
+        
+        // Process matches in reverse order (to preserve indices)
+        for (let i = ifElseMatches.length - 1; i >= 0; i--) {
+            const m = ifElseMatches[i];
+            const value = getNestedValue(data, m.variable);
+            let replacement = '';
             
             if (isTruthy(value)) {
-                result = result.substring(0, index) + ifContent + result.substring(index + fullMatch.length);
+                // Process nested conditionals in if block too
+                replacement = processNestedConditionals(m.ifContent, data);
             } else {
-                result = result.substring(0, index) + elseContent + result.substring(index + fullMatch.length);
+                // Process nested conditionals in else block
+                replacement = processNestedConditionals(m.elseContent, data);
+            }
+            
+            result = result.substring(0, m.index) + replacement + result.substring(m.index + m.fullMatch.length);
+        }
+        
+        // Then process simple if blocks (without else) - but exclude those already in if/else
+        const ifRegex = /\{\{#if\s+(\w+)\}\}([\s\S]*?)\{\{\/if\}\}/g;
+        const ifMatches = [];
+        let ifMatch;
+        
+        // Reset regex lastIndex and collect all simple if matches
+        ifRegex.lastIndex = 0;
+        while ((ifMatch = ifRegex.exec(result)) !== null) {
+            // Skip if this is part of an if/else block (check context)
+            const before = result.substring(Math.max(0, ifMatch.index - 100), ifMatch.index);
+            const after = result.substring(ifMatch.index, Math.min(result.length, ifMatch.index + ifMatch[0].length + 100));
+            
+            if (!before.includes('{{else}}') && !after.includes('{{else}}')) {
+                ifMatches.push({
+                    fullMatch: ifMatch[0],
+                    variable: ifMatch[1],
+                    content: ifMatch[2],
+                    index: ifMatch.index
+                });
             }
         }
         
-        // Then process simple if blocks (without else)
-        const ifRegex = /\{\{#if\s+(\w+)\}\}([\s\S]*?)\{\{\/if\}\}/;
-        let ifMatch;
-        
-        while ((ifMatch = result.match(ifRegex)) !== null) {
-            const [fullMatch, variable, content] = ifMatch;
-            const value = getNestedValue(data, variable);
-            const index = result.indexOf(fullMatch);
+        // Process matches in reverse order
+        for (let i = ifMatches.length - 1; i >= 0; i--) {
+            const m = ifMatches[i];
+            const value = getNestedValue(data, m.variable);
             
             if (isTruthy(value)) {
-                result = result.substring(0, index) + content + result.substring(index + fullMatch.length);
+                result = result.substring(0, m.index) + m.content + result.substring(m.index + m.fullMatch.length);
             } else {
-                result = result.substring(0, index) + result.substring(index + fullMatch.length);
+                result = result.substring(0, m.index) + result.substring(m.index + m.fullMatch.length);
             }
         }
         
