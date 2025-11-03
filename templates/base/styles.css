@@ -532,15 +532,17 @@ section {
 }
 
 .contact-grid {
-    display: grid;
-    grid-template-columns: 1fr 1.2fr;
-    gap: 4rem;
+    display: flex;
+    justify-content: center;
     margin-bottom: 3rem;
 }
 
 .contact-info {
     display: grid;
-    gap: 1.5rem;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2rem;
+    max-width: 1000px;
+    width: 100%;
 }
 
 .contact-card {
@@ -759,9 +761,9 @@ section {
         font-size: 1.1rem;
     }
 
-    .contact-grid {
+    .contact-info {
         grid-template-columns: 1fr;
-        gap: 2rem;
+        gap: 1.5rem;
     }
 
     .services-grid {
